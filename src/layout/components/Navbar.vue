@@ -11,8 +11,8 @@
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img src="@/assets/common/bigUserHeader.png" class="user-avatar">
-          <span class="name">管理员</span>
+          <img v-imgerror="defaultImg" :src="staffPhoto" class="user-avatar">
+          <span class="name">{{ name }}</span>
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
@@ -21,7 +21,7 @@
               首页
             </el-dropdown-item>
           </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
+          <a target="_blank" href="https://github.com/lekeRonin/vue_hrass">
             <el-dropdown-item>项目地址</el-dropdown-item>
           </a>
           <el-dropdown-item divided @click.native="logout">
@@ -37,16 +37,24 @@
 import { mapGetters } from 'vuex'
 // import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
+import defaultImg from '@/assets/common/bigUserHeader.png'
 
 export default {
   components: {
     // Breadcrumb,
     Hamburger
   },
+  data() {
+    return {
+      defaultImg
+    }
+  },
   computed: {
     ...mapGetters([
       'sidebar',
-      'avatar'
+      'avatar',
+      'name',
+      'staffPhoto'
     ])
   },
   methods: {
@@ -55,7 +63,7 @@ export default {
     },
     async logout() {
       await this.$store.dispatch('user/logout')
-      this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+      this.$router.push(`/login`)
     }
   }
 }

@@ -1,14 +1,27 @@
 
 import axios from 'axios'
 import { Message } from 'element-ui'
-
+import store from '@/store'
+import { getTime } from './auth'
+import router from '@/router'
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
   timeout: 5000
 })
 
-service.interceptors.request.use(config => {
-  return config
+service.interceptors.request.use(async config => {
+  if (store.getters.token) {
+    // 如果token存在 注入token
+    if (isTimeout()) {
+      await store.dispatch('user/logout')
+      router.push('/login')
+      return Promise.reject(new Error('token失效了，请重新登录'))
+    }
+    config.headers['Authorization'] = `Bearer ${store.getters.token}`
+  }
+  return config // 必须返回配置
+}, error => {
+  return Promise.reject(error)
 })
 
 service.interceptors.response.use(response => {
@@ -22,11 +35,28 @@ service.interceptors.response.use(response => {
     Message.error(message) // 提示错误消息
     return Promise.reject(new Error(message))
   }
-}, error => {
-  Message.error(error.message) // 提示错误信息
+}, async error => {
+  if (error?.response?.data?.code === 10002) {
+    await store.dispatch('user/logout')
+    router.push('/login')
+    return Promise.reject(new Error('token失效了，请重新登录'))
+  } else {
+    Message.error(error.message)
+  }
+  // 提示错误信息
   return Promise.reject(error) // 返回执行错误 让当前的执行链跳出成功 直接进入 catch
 })
 
+const expirsTime = 8 * 60 * 60 * 1000
+// const expirsTime = 3 * 1000
+
+function isTimeout() {
+  const prevTime = getTime()
+
+  const currTime = Date.now()
+
+  return currTime - prevTime > expirsTime
+}
 export default service
 // import axios from 'axios'
 // import { MessageBox, Message } from 'element-ui'

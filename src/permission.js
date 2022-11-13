@@ -3,12 +3,16 @@ import store from '@/store'
 import nprogress from 'nprogress'
 import 'nprogress/nprogress.css'
 const whiteList = ['/login', '/404']
-router.beforeEach((to, from, next) => {
+router.beforeEach(async(to, from, next) => {
   nprogress.start()
   if (store.getters.token) {
     if (to.path === '/login') {
       next('/')
     } else {
+      // 在这里去请求用户信息
+      if (!store.getters.userId) {
+        await store.dispatch('user/getUserInfo')
+      }
       next()
     }
   } else {

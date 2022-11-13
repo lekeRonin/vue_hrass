@@ -1,7 +1,8 @@
-import { getToken, setToken, removeToken } from '@/utils/auth'
-import { login } from '@/api/user'
+import { getToken, setToken, removeToken, setTime } from '@/utils/auth'
+import { login, getUserInfo, getUserDetailById } from '@/api/user'
 const state = {
-  token: getToken() // 设置token为共享状态
+  token: getToken(), // 设置token为共享状态
+  userInfo: {}
 }
 // 修改状态
 const mutations = {
@@ -13,6 +14,9 @@ const mutations = {
   removeToken(state) {
     state.token = null // 删除vuex的token
     removeToken() // 先清除 vuex  再清除缓存 vuex和 缓存数据的同步
+  },
+  setUserInfo(state, userInfo) {
+    state.userInfo = { ...userInfo }
   }
 }
 // 执行异步
@@ -27,7 +31,22 @@ const actions = {
     //   // actions 修改state 必须通过mutations
     //   context.commit('setToken', result.data.data)
     // }
+    setTime()
     context.commit('setToken', result)
+  },
+  // async getUserInfo(context) {
+  //   const result = await getUserInfo() // 获取返回值
+  //   context.commit('setUserInfo', result) // 将整个的个人信息设置到用户的vuex数据中
+  //   return result // 这里为什么要返回 为后面埋下伏笔
+  // },
+  async getUserInfo({ commit }) {
+    const data = await getUserInfo()
+    const baseInfo = await getUserDetailById(data.userId)
+    commit('setUserInfo', { ...data, ...baseInfo })
+  },
+  logout({ commit }) {
+    commit('setToken', null)
+    commit('setUserInfo', {})
   }
 }
 export default {

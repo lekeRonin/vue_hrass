@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function login(data) {
+export const login = (data) => {
   return request({
     url: '/sys/login',
     method: 'post',
@@ -8,12 +8,19 @@ export function login(data) {
   })
 }
 
-export function getInfo(token) {
-  // return request({
-  //   url: '/vue-admin-template/user/info',
-  //   method: 'get',
-  //   params: { token }
-  // })
+export const getUserInfo = () => {
+  return request({
+    url: '/sys/profile',
+    method: 'post'
+  })
+}
+
+// 获取员工基本信息
+export function getUserDetailById(id) {
+  return request({
+    url: `/sys/user/${id}`,
+    method: 'GET'
+  })
 }
 
 export function logout() {
